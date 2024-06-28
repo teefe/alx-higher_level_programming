@@ -1,17 +1,30 @@
 #!/usr/bin/python3
-# Lists all cities of the database hbtn_0e_4_usa, ordered by city id.
-# Usage: ./4-cities_by_state.py <mysql username> \
-#                               <mysql password> \
-#                               <database name>
-import sys
-import MySQLdb
+"""
+This script takes in an argument and
+displays all values in the states
+where `name` matches the argument
+from the database `hbtn_0e_0_usa`.
+This time the script is safe from
+MySQL injections!
+"""
+
+import MySQLdb as db
+from sys import argv
 
 if __name__ == "__main__":
-    db = MySQLdb.connect(user=sys.argv[1], passwd=sys.argv[2], db=sys.argv[3])
-    c = db.cursor()
-    c.execute("SELECT `c`.`id`, `c`.`name`, `s`.`name` \
-                 FROM `cities` as `c` \
-                INNER JOIN `states` as `s` \
-                   ON `c`.`state_id` = `s`.`id` \
-                ORDER BY `c`.`id`")
-    [print(city) for city in c.fetchall()]
+    """
+    Access to the database and get the states
+    from the database.
+    """
+    db_connect = db.connect(host="localhost", port=3306,
+                            user=argv[1], passwd=argv[2], db=argv[3])
+
+    db_cursor = db_connect.cursor()
+    db_cursor.execute(
+        "SELECT * FROM states WHERE name LIKE \
+                    BINARY %(name)s ORDER BY states.id ASC", {'name': argv[4]})
+
+    rows_selected = db_cursor.fetchall()
+
+    for row in rows_selected:
+        print(row)
